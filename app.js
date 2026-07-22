@@ -171,15 +171,16 @@ const TransactionStore = {
 
 const Formatting = {
   /**
-   * Format a number as a locale-independent currency string with exactly
-   * 2 decimal places. No currency symbol is included.
-   * Examples: 1234.56 → "1234.56", 0 → "0.00", -50.25 → "-50.25"
+   * Format a number as an IDR (Indonesian Rupiah) currency string.
+   * Uses the absolute value of the input, dot-separated thousands, no decimals.
+   * Examples: 150000 → "Rp 150.000", 1500000 → "Rp 1.500.000", 0 → "Rp 0"
    * Requirement 1.1, 3.2
    * @param {number} amount
    * @returns {string}
    */
   formatCurrency(amount) {
-    return Number(amount).toFixed(2);
+    const abs = Math.abs(Math.round(Number(amount)));
+    return 'Rp ' + abs.toLocaleString('id-ID');
   },
 
   /**
@@ -258,9 +259,10 @@ const Validation = {
   },
 
   /**
-   * Validate a transaction amount.
+   * Validate a transaction amount in IDR (Indonesian Rupiah).
    * Uses Formatting.parseAmount() to parse the raw input string.
-   * Rejects empty, non-numeric, ≤ 0, or > 999,999,999.99 values.
+   * Rejects empty, non-numeric, non-integer, ≤ 0, or > 999,999,999,999 values.
+   * IDR amounts are always whole numbers (no cents).
    * Requirement 2.5
    * @param {string} value
    * @returns {{ isValid: boolean, errorMessage: string }}
@@ -274,11 +276,14 @@ const Validation = {
     if (parsed === null) {
       return { isValid: false, errorMessage: 'Please enter a valid number.' };
     }
+    if (!Number.isInteger(parsed)) {
+      return { isValid: false, errorMessage: 'Amount must be a whole number (IDR has no cents).' };
+    }
     if (parsed <= 0) {
       return { isValid: false, errorMessage: 'Amount must be greater than 0.' };
     }
-    if (parsed > 999999999.99) {
-      return { isValid: false, errorMessage: 'Amount is too large.' };
+    if (parsed > 999999999999) {
+      return { isValid: false, errorMessage: 'Amount is too large (max Rp 999.999.999.999).' };
     }
     return { isValid: true, errorMessage: '' };
   },
@@ -331,7 +336,8 @@ const BalanceDisplay = {
     const el = document.getElementById('balance-display');
     if (!el) return;
     const formatted = Formatting.formatCurrency(balance);
-    el.textContent = balance >= 0 ? '+' + formatted : formatted;
+    // formatted is already "Rp 1.500.000"; prepend + or − (U+2212) sign
+    el.textContent = balance >= 0 ? '+' + formatted : '\u2212' + formatted;
   },
 
   /**
@@ -620,7 +626,7 @@ const TransactionList = {
     desc.className = 'transaction-description';
     desc.textContent = transaction.description;
 
-    // Amount — use U+2212 MINUS SIGN for expenses, + for income
+    // Amount — formatCurrency returns "Rp 1.500.000"; prepend − (U+2212) for expenses, + for income
     const amountPrefix = transaction.type === 'expense' ? '\u2212' : '+';
     const amountFormatted = Formatting.formatCurrency(transaction.amount);
     const amount = document.createElement('span');
