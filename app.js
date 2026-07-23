@@ -171,15 +171,17 @@ const TransactionStore = {
 
 const Formatting = {
   /**
-   * Format a number as a currency string with exactly 2 decimal places.
-   * No currency symbol, locale-independent (uses plain toFixed(2)).
-   * Examples: 1234.56 → "1234.56", 0 → "0.00", -50.25 → "-50.25"
+   * Format a number as an IDR currency string with dot-separated thousands,
+   * no decimal places, and "Rp " prefix.
+   * Uses the absolute value of the input.
+   * Examples: 150000 → "Rp 150.000", 1500000 → "Rp 1.500.000", 0 → "Rp 0"
    * Requirement 1.1, 3.2
    * @param {number} amount
    * @returns {string}
    */
   formatCurrency(amount) {
-    return Number(amount).toFixed(2);
+    const abs = Math.abs(Math.round(Number(amount)));
+    return 'Rp ' + abs.toLocaleString('id-ID');
   },
 
   /**
