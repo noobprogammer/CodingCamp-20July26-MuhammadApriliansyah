@@ -5,29 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Expense &amp; Budget Visualizer — track income and expenses, view your balance, and visualize spending by category.">
   <title>Expense &amp; Budget Visualizer</title>
+  <!-- Theme detection: runs synchronously before stylesheet to prevent flash of wrong theme.
+       Reads localStorage key 'expense_tracker_theme', falls back to prefers-color-scheme.
+       Requirements: 12.4, 12.5 -->
+  <script>
+    (function () {
+      var stored = null;
+      try { stored = localStorage.getItem('expense_tracker_theme'); } catch (e) {}
+      var theme = stored === 'dark' || stored === 'light'
+        ? stored
+        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    }());
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <!-- Persistent error banner for localStorage read failures -->
-  <div id="error-banner" role="alert" aria-live="assertive" hidden></div>
+  <aside id="error-banner" role="alert" aria-live="assertive" hidden>
+    <!-- Error message inserted here by AppController.init() on storage read failure -->
+  </aside>
 
   <!-- Screen reader live region for transient error announcements -->
   <div id="error-announcer" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
   <header>
     <h1 class="app-title">Expense &amp; Budget Visualizer</h1>
-    <p class="balance-label">Total Balance</p>
-    <div id="balance-display" aria-label="Current balance">
+    <!-- Theme toggle button — aria-label is set dynamically by AppController.init()
+         to describe the action the button will perform (e.g. "Switch to dark mode").
+         Requirements: 12.1, 12.2 -->
+    <button
+      type="button"
+      id="theme-toggle"
+      class="btn-theme-toggle"
+      aria-label="Switch to dark mode"
+    >&#9788;</button>
+    <p class="balance-label" id="balance-label">Total Balance</p>
+    <output id="balance-display" for="transaction-form" aria-labelledby="balance-label" aria-live="polite">
       <!-- Balance rendered here by BalanceDisplay module -->
-    </div>
+    </output>
   </header>
+
+  <!-- View toggle navigation: Transactions | Summary | Limits tabs
+       Requirements: 9.4, 9.6, 11.1 -->
+  <nav id="view-nav" aria-label="View toggle">
+    <button
+      type="button"
+      id="nav-transactions"
+      class="view-tab view-tab--active"
+      aria-current="page"
+      data-view="transactions"
+    >Transactions</button>
+    <button
+      type="button"
+      id="nav-summary"
+      class="view-tab"
+      data-view="summary"
+    >Summary</button>
+    <button
+      type="button"
+      id="nav-limits"
+      class="view-tab"
+      data-view="limits"
+    >Limits</button>
+  </nav>
 
   <main>
     <!-- Transaction input form -->
     <section aria-labelledby="form-heading">
       <h2 id="form-heading">Add Transaction</h2>
       <form id="transaction-form" novalidate>
+
         <div class="form-group">
           <label for="desc">Description</label>
           <input type="text" id="desc" name="desc" maxlength="100" autocomplete="off" placeholder="e.g. Grocery shopping">
@@ -50,13 +99,36 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label for="type">Type</label>
-          <select id="type" name="type">
-            <option value="expense">Expense</option>
-            <option value="income">Income</option>
-          </select>
+        <div class="form-group form-group--add-category">
+          <label for="custom-category-input">New Category</label>
+          <div class="add-category-controls">
+            <input
+              type="text"
+              id="custom-category-input"
+              name="custom-category-input"
+              maxlength="30"
+              autocomplete="off"
+              placeholder="e.g. Gym"
+              aria-describedby="custom-category-hint"
+            >
+            <button type="button" id="custom-category-btn" class="btn-add-category">Add Category</button>
+          </div>
+          <span id="custom-category-hint" class="form-hint">1–30 characters, unique name</span>
         </div>
+
+        <fieldset class="form-group form-group--fieldset">
+          <legend>Transaction Type</legend>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" id="type-expense" name="type" value="expense" checked>
+              Expense
+            </label>
+            <label class="radio-label">
+              <input type="radio" id="type-income" name="type" value="income">
+              Income
+            </label>
+          </div>
+        </fieldset>
 
         <div class="form-group">
           <label for="date">Date</label>
@@ -70,8 +142,18 @@
     <!-- Transaction history list -->
     <section aria-labelledby="list-heading">
       <h2 id="list-heading">Transaction History</h2>
+      <div class="list-controls">
+        <label for="sort-order">Sort by</label>
+        <select id="sort-order">
+          <option value="date-desc" selected>Date (newest first)</option>
+          <option value="amount-desc">Amount (highest first)</option>
+          <option value="amount-asc">Amount (lowest first)</option>
+          <option value="category-asc">Category (A–Z)</option>
+        </select>
+      </div>
       <div id="transaction-list" aria-live="polite" aria-relevant="additions removals">
-        <!-- Transaction items rendered by TransactionList module -->
+        <!-- TransactionList module renders a <ul class="transaction-items"> here,
+             followed by <nav class="pagination"> controls when list > 50 items -->
       </div>
     </section>
 
@@ -81,6 +163,25 @@
       <div id="chart-section">
         <canvas id="chart-canvas" width="300" height="300" aria-label="Pie chart of spending by category" role="img"></canvas>
         <!-- Chart empty state or legend rendered by Chart module -->
+      </div>
+    </section>
+
+    <!-- Monthly summary view (hidden by default; toggled by nav) -->
+    <section id="summary-section" aria-labelledby="summary-heading" hidden>
+      <h2 id="summary-heading">Monthly Summary</h2>
+      <!-- SummaryView module renders table or empty-state message here -->
+    </section>
+
+    <!-- Spending limits panel (hidden by default; toggled by nav)
+         Requirements: 11.1, 11.2, 11.6 -->
+    <section id="limits-section" aria-labelledby="limits-heading" hidden>
+      <h2 id="limits-heading">Spending Limits</h2>
+      <p class="limits-description">
+        Set a maximum spending limit per category. You will be alerted when expenses
+        reach or exceed the limit.
+      </p>
+      <div id="limits-panel-container">
+        <!-- LimitsPanel module renders fieldset rows here via LimitsPanel.render() -->
       </div>
     </section>
   </main>
