@@ -118,13 +118,13 @@
 
         <fieldset class="form-group form-group--fieldset">
           <legend>Transaction Type</legend>
-          <div class="radio-group">
-            <label class="radio-label">
-              <input type="radio" id="type-expense" name="type" value="expense" checked>
+          <div class="type-toggle-group" role="group" aria-label="Transaction type">
+            <input type="radio" id="type-expense" name="type" value="expense" class="type-radio" checked>
+            <label for="type-expense" class="type-toggle-btn type-toggle-btn--expense">
               Expense
             </label>
-            <label class="radio-label">
-              <input type="radio" id="type-income" name="type" value="income">
+            <input type="radio" id="type-income" name="type" value="income" class="type-radio">
+            <label for="type-income" class="type-toggle-btn type-toggle-btn--income">
               Income
             </label>
           </div>
@@ -137,6 +137,15 @@
 
         <button type="submit" class="btn-submit">Add Transaction</button>
       </form>
+    </section>
+
+    <!-- Spending chart -->
+    <section aria-labelledby="chart-heading">
+      <h2 id="chart-heading">Spending by Category</h2>
+      <div id="chart-section">
+        <canvas id="chart-canvas" width="300" height="300" aria-label="Pie chart of spending by category" role="img"></canvas>
+        <!-- Chart empty state or legend rendered by Chart module -->
+      </div>
     </section>
 
     <!-- Transaction history list -->
@@ -154,15 +163,6 @@
       <div id="transaction-list" aria-live="polite" aria-relevant="additions removals">
         <!-- TransactionList module renders a <ul class="transaction-items"> here,
              followed by <nav class="pagination"> controls when list > 50 items -->
-      </div>
-    </section>
-
-    <!-- Spending chart -->
-    <section aria-labelledby="chart-heading">
-      <h2 id="chart-heading">Spending by Category</h2>
-      <div id="chart-section">
-        <canvas id="chart-canvas" width="300" height="300" aria-label="Pie chart of spending by category" role="img"></canvas>
-        <!-- Chart empty state or legend rendered by Chart module -->
       </div>
     </section>
 
@@ -185,10 +185,6 @@
       </div>
     </section>
   </main>
-
-  <footer>
-    <p>Data is stored locally in your browser. No data is sent to any server.</p>
-  </footer>
 
   <script defer src="app.js"></script>
 </body>

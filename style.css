@@ -829,13 +829,13 @@ footer p {
     grid-row: 1 / 3;
   }
 
-  /* Transaction list sits top-right */
+  /* Chart section sits top-right (was previously bottom-right) */
   main section:nth-child(2) {
     grid-column: 2;
     grid-row: 1;
   }
 
-  /* Chart section sits bottom-right */
+  /* Transaction list sits bottom-right (was previously top-right) */
   main section:nth-child(3) {
     grid-column: 2;
     grid-row: 2;
@@ -857,4 +857,320 @@ footer p {
     flex-wrap: wrap;
     justify-content: center;
   }
+}
+
+/* ============================================================
+   Transaction Type Toggle Buttons
+   Pill-shaped radio buttons for Expense / Income selection.
+   The real <input type="radio"> is visually hidden; the <label>
+   acts as the clickable button. Checked state is styled via the
+   adjacent-sibling combinator: input:checked + label.
+   ============================================================ */
+
+/* Hide the real radio inputs but keep them accessible */
+.type-radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Wrapper — lays out both buttons side by side */
+.type-toggle-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Base pill button style */
+.type-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);   /* 44px touch target */
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-medium);
+  border-radius: 999px;              /* full pill shape */
+  border: 2px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  flex: 1 1 0;                       /* both buttons share equal width */
+  text-align: center;
+}
+
+.type-toggle-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+/* Focus ring — shown when keyboard-navigating to the hidden radio */
+.type-radio:focus-visible + .type-toggle-btn {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ---- Checked states ---- */
+
+/* Expense — red pill when selected */
+.type-radio:checked + .type-toggle-btn--expense {
+  background-color: var(--color-negative);
+  border-color: var(--color-negative);
+  color: #ffffff;
+  font-weight: var(--font-weight-bold);
+}
+
+/* Income — green pill when selected */
+.type-radio:checked + .type-toggle-btn--income {
+  background-color: var(--color-positive);
+  border-color: var(--color-positive);
+  color: #ffffff;
+  font-weight: var(--font-weight-bold);
+}
+
+/* ============================================================
+   Summary Page — Bank-statement style
+   Compact rows, no heavy table borders, clean typography.
+   ============================================================ */
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.summary-table caption {
+  display: none; /* visually hidden but still present for accessibility */
+}
+
+.summary-table thead th {
+  padding: var(--space-1) var(--space-2);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.summary-table thead th:last-child,
+.summary-table tbody td:last-child {
+  text-align: right;
+}
+
+.summary-table thead th:nth-child(2),
+.summary-table thead th:nth-child(3),
+.summary-table tbody td:nth-child(2),
+.summary-table tbody td:nth-child(3) {
+  text-align: right;
+}
+
+.summary-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.1s ease;
+}
+
+.summary-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.summary-table tbody tr:hover {
+  background-color: var(--color-bg);
+}
+
+.summary-table tbody td {
+  padding: var(--space-2) var(--space-2);
+  vertical-align: middle;
+  line-height: 1.3;
+}
+
+/* Month cell — bold, slightly larger */
+.summary-table tbody td:first-child {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.summary-income {
+  color: var(--color-positive);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.summary-expenses {
+  color: var(--color-negative);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.summary-net {
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.summary-net--positive {
+  color: var(--color-positive);
+}
+
+.summary-net--negative {
+  color: var(--color-negative);
+}
+
+/* Override the section padding for summary to feel tighter */
+#summary-section {
+  padding: var(--space-3);
+}
+
+#summary-section h2 {
+  font-size: var(--font-size-base);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--color-border);
+}
+
+/* ============================================================
+   Limits Page — Compact card-style rows matching the form box
+   ============================================================ */
+
+/* Remove default fieldset chrome */
+.limits-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.limits-fieldset > legend {
+  display: none; /* heading already provided by #limits-heading in HTML */
+}
+
+/* Each category is a self-contained card row */
+.limits-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.limits-row:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Category name — fixed width so inputs align */
+.limits-category-label {
+  flex: 0 0 auto;
+  min-width: 90px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+/* Amount input — fills remaining space */
+.limits-amount-input {
+  flex: 1 1 80px;
+  min-width: 80px;
+  min-height: 36px;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease;
+}
+
+.limits-amount-input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-color: var(--color-accent);
+}
+
+.limits-amount-input::placeholder {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Set / Clear buttons — compact, inline */
+.btn-limit-set,
+.btn-limit-clear {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-limit-set {
+  background-color: var(--color-accent);
+  color: var(--color-text-on-dark);
+  border: 1px solid var(--color-accent);
+}
+
+.btn-limit-set:hover,
+.btn-limit-set:focus {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.btn-limit-clear {
+  background-color: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.btn-limit-clear:hover:not(:disabled),
+.btn-limit-clear:focus:not(:disabled) {
+  color: var(--color-negative);
+  border-color: var(--color-negative);
+}
+
+.btn-limit-clear:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-limit-set:focus,
+.btn-limit-clear:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Error message inside a limits row */
+.limits-error {
+  flex: 1 1 100%;  /* push to its own line */
+  margin-top: 0;
+  padding: 0 var(--space-1);
+}
+
+/* Compact the limits section heading */
+#limits-section h2 {
+  font-size: var(--font-size-base);
+  margin-bottom: var(--space-2);
+}
+
+.limits-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3) 0;
+  line-height: 1.4;
 }
