@@ -1,193 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Expense &amp; Budget Visualizer — track income and expenses, view your balance, and visualize spending by category.">
-  <title>Expense &amp; Budget Visualizer</title>
-  <!-- Theme detection: runs synchronously before stylesheet to prevent flash of wrong theme.
-       Reads localStorage key 'expense_tracker_theme', falls back to prefers-color-scheme.
-       Requirements: 12.4, 12.5 -->
+  <title>Expense & Budget Visualizer</title>
   <script>
     (function () {
-      var stored = null;
-      try { stored = localStorage.getItem('expense_tracker_theme'); } catch (e) {}
-      var theme = stored === 'dark' || stored === 'light'
-        ? stored
-        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', theme);
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
     }());
   </script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <!-- Persistent error banner for localStorage read failures -->
-  <aside id="error-banner" role="alert" aria-live="assertive" hidden>
-    <!-- Error message inserted here by AppController.init() on storage read failure -->
-  </aside>
-
-  <!-- Screen reader live region for transient error announcements -->
-  <div id="error-announcer" aria-live="polite" aria-atomic="true" class="sr-only"></div>
-
+  <!-- Header -->
   <header>
     <div class="header-top">
-      <h1 class="app-title">Expense &amp; Budget Visualizer</h1>
-      <!-- Theme toggle button — aria-label is set dynamically by AppController.init()
-           to describe the action the button will perform (e.g. "Switch to dark mode").
-           Requirements: 12.1, 12.2 -->
-      <button
-        type="button"
-        id="theme-toggle"
-        class="btn-theme-toggle"
-        aria-label="Switch to dark mode"
-      >&#9788;</button>
+      <h1>Expense & Budget Visualizer</h1>
+      <button id="theme-toggle" title="Toggle dark/light mode">🌞</button>
     </div>
-    <p class="balance-label" id="balance-label">Total Balance</p>
-    <output id="balance-display" for="transaction-form" aria-labelledby="balance-label" aria-live="polite">
-      <!-- Balance rendered here by BalanceDisplay module -->
-    </output>
+    <p class="balance-label">Total Balance</p>
+    <div id="balance-display">Rp 0</div>
   </header>
 
-  <!-- View toggle navigation: Transactions | Summary | Limits tabs
-       Requirements: 9.4, 9.6, 11.1 -->
-  <nav id="view-nav" aria-label="View toggle">
-    <button
-      type="button"
-      id="nav-transactions"
-      class="view-tab view-tab--active"
-      aria-current="page"
-      data-view="transactions"
-    >Transactions</button>
-    <button
-      type="button"
-      id="nav-summary"
-      class="view-tab"
-      data-view="summary"
-    >Summary</button>
-    <button
-      type="button"
-      id="nav-limits"
-      class="view-tab"
-      data-view="limits"
-    >Limits</button>
-  </nav>
-
   <main>
-    <!-- Transaction input form -->
-    <section aria-labelledby="form-heading">
-      <h2 id="form-heading">Add Transaction</h2>
-      <form id="transaction-form" novalidate>
+
+    <!-- Add Transaction Form -->
+    <section class="card">
+      <h2>Add Transaction</h2>
+      <form id="transaction-form">
 
         <div class="form-group">
-          <label for="desc">Description</label>
-          <input type="text" id="desc" name="desc" maxlength="100" autocomplete="off" placeholder="e.g. Grocery shopping">
+          <label for="desc">Item Name</label>
+          <input type="text" id="desc" placeholder="e.g. Grocery shopping" maxlength="100">
         </div>
 
         <div class="form-group">
           <label for="amount">Amount (Rp)</label>
-          <input type="number" id="amount" name="amount" min="1" step="1" placeholder="e.g. 150000">
+          <input type="number" id="amount" placeholder="e.g. 50000" min="1">
         </div>
 
         <div class="form-group">
           <label for="category">Category</label>
-          <select id="category" name="category">
+          <select id="category">
             <option value="">-- Select category --</option>
             <option value="Food">Food</option>
             <option value="Transport">Transport</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Health">Health</option>
-            <option value="Other">Other</option>
+            <option value="Fun">Fun</option>
           </select>
         </div>
 
-        <div class="form-group form-group--add-category">
-          <label for="custom-category-input">New Category</label>
-          <div class="add-category-controls">
-            <input
-              type="text"
-              id="custom-category-input"
-              name="custom-category-input"
-              maxlength="30"
-              autocomplete="off"
-              placeholder="e.g. Gym"
-              aria-describedby="custom-category-hint"
-            >
-            <button type="button" id="custom-category-btn" class="btn-add-category">Add Category</button>
+        <div class="form-group">
+          <label for="new-category">New Category</label>
+          <div class="input-row">
+            <input type="text" id="new-category" placeholder="e.g. Gym" maxlength="30">
+            <button type="button" id="add-category-btn">Add</button>
           </div>
-          <span id="custom-category-hint" class="form-hint">1–30 characters, unique name</span>
         </div>
-
-        <fieldset class="form-group form-group--fieldset">
-          <legend>Transaction Type</legend>
-          <div class="type-toggle-group" role="group" aria-label="Transaction type">
-            <input type="radio" id="type-expense" name="type" value="expense" class="type-radio" checked>
-            <label for="type-expense" class="type-toggle-btn type-toggle-btn--expense">
-              Expense
-            </label>
-            <input type="radio" id="type-income" name="type" value="income" class="type-radio">
-            <label for="type-income" class="type-toggle-btn type-toggle-btn--income">
-              Income
-            </label>
-          </div>
-        </fieldset>
 
         <div class="form-group">
           <label for="date">Date</label>
-          <input type="date" id="date" name="date">
+          <input type="date" id="date">
         </div>
 
-        <button type="submit" class="btn-submit">Add Transaction</button>
+        <span id="form-error" class="form-error"></span>
+        <button type="submit" class="btn-primary">Add Transaction</button>
+
       </form>
     </section>
 
-    <!-- Spending chart -->
-    <section aria-labelledby="chart-heading">
-      <h2 id="chart-heading">Spending by Category</h2>
-      <div id="chart-section">
-        <canvas id="chart-canvas" width="300" height="300" aria-label="Pie chart of spending by category" role="img"></canvas>
-        <!-- Chart empty state or legend rendered by Chart module -->
+    <!-- Pie Chart -->
+    <section class="card">
+      <h2>Spending by Category</h2>
+      <div id="chart-container">
+        <canvas id="pie-chart"></canvas>
+      </div>
+      <div id="chart-empty" class="empty-state" style="display:none">No expense data yet.</div>
+    </section>
+
+    <!-- Transaction List -->
+    <section class="card">
+      <h2>Transaction History</h2>
+      <ul id="transaction-list">
+        <li class="empty-state">No transactions yet.</li>
+      </ul>
+    </section>
+
+    <!-- Monthly Summary -->
+    <section class="card">
+      <h2>Monthly Summary</h2>
+      <div id="summary-container">
+        <p class="empty-state">No transactions yet.</p>
       </div>
     </section>
 
-    <!-- Transaction history list -->
-    <section aria-labelledby="list-heading">
-      <h2 id="list-heading">Transaction History</h2>
-      <div class="list-controls">
-        <label for="sort-order">Sort by</label>
-        <select id="sort-order">
-          <option value="date-desc" selected>Date (newest first)</option>
-          <option value="amount-desc">Amount (highest first)</option>
-          <option value="amount-asc">Amount (lowest first)</option>
-          <option value="category-asc">Category (A–Z)</option>
-        </select>
-      </div>
-      <div id="transaction-list" aria-live="polite" aria-relevant="additions removals">
-        <!-- TransactionList module renders a <ul class="transaction-items"> here,
-             followed by <nav class="pagination"> controls when list > 50 items -->
-      </div>
-    </section>
-
-    <!-- Monthly summary view (hidden by default; toggled by nav) -->
-    <section id="summary-section" aria-labelledby="summary-heading" hidden>
-      <h2 id="summary-heading">Monthly Summary</h2>
-      <!-- SummaryView module renders table or empty-state message here -->
-    </section>
-
-    <!-- Spending limits panel (hidden by default; toggled by nav)
-         Requirements: 11.1, 11.2, 11.6 -->
-    <section id="limits-section" aria-labelledby="limits-heading" hidden>
-      <h2 id="limits-heading">Spending Limits</h2>
-      <p class="limits-description">
-        Set a maximum spending limit per category. You will be alerted when expenses
-        reach or exceed the limit.
-      </p>
-      <div id="limits-panel-container">
-        <!-- LimitsPanel module renders fieldset rows here via LimitsPanel.render() -->
-      </div>
-    </section>
   </main>
 
-  <script defer src="app.js"></script>
+  <footer>
+    <p>Data saved in your browser. No data is sent anywhere.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="js/script.js"></script>
 </body>
 </html>

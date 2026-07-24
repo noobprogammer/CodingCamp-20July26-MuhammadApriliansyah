@@ -1,0 +1,331 @@
+/* Expense & Budget Visualizer — styles */
+
+/* ── Tokens ── */
+:root {
+  --bg:        #f3f4f6;
+  --surface:   #ffffff;
+  --border:    #d1d5db;
+  --text:      #111827;
+  --muted:     #6b7280;
+  --accent:    #2563eb;
+  --accent-h:  #1d4ed8;
+  --green:     #16a34a;
+  --red:       #dc2626;
+  --radius:    8px;
+  --shadow:    0 1px 4px rgba(0,0,0,.08);
+}
+
+[data-theme="dark"] {
+  --bg:        #111827;
+  --surface:   #1f2937;
+  --border:    #374151;
+  --text:      #f9fafb;
+  --muted:     #9ca3af;
+  --accent:    #60a5fa;
+  --accent-h:  #93c5fd;
+  --green:     #4ade80;
+  --red:       #f87171;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body, header, main, footer, section {
+  transition: background-color .2s, color .2s;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+  min-width: 320px;
+}
+
+/* ── Header ── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px 16px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: left;
+}
+
+#theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+#theme-toggle:hover { border-color: var(--accent); }
+
+.balance-label {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+#balance-display {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+
+/* ── Main layout ── */
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.card h2 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* ── Form ── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+
+.form-group input::placeholder { color: var(--muted); }
+
+.input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.input-row input { flex: 1; }
+
+.input-row button {
+  height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.input-row button:hover { background: var(--accent); color: #fff; }
+
+.form-error {
+  display: block;
+  color: var(--red);
+  font-size: 13px;
+  min-height: 18px;
+  margin-bottom: 6px;
+}
+
+.btn-primary {
+  width: 100%;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-primary:hover { background: var(--accent-h); }
+
+/* ── Chart ── */
+#chart-container {
+  display: flex;
+  justify-content: center;
+}
+
+#pie-chart {
+  max-width: 260px;
+  max-height: 260px;
+}
+
+/* ── Transaction list ── */
+#transaction-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.tx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  font-size: 14px;
+}
+
+.tx-name  { flex: 1; font-weight: 500; }
+.tx-amount { font-weight: 700; white-space: nowrap; }
+.tx-badge {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tx-date  { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+.tx-delete {
+  background: transparent;
+  border: none;
+  color: var(--red);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.tx-delete:hover { background: #fee2e2; }
+
+/* ── Monthly Summary ── */
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.summary-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted);
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-table th:not(:first-child),
+.summary-table td:not(:first-child) { text-align: right; }
+
+.summary-table td {
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-table tr:last-child td { border-bottom: none; }
+.summary-table tr:hover td { background: var(--bg); }
+
+.col-income   { color: var(--green); font-weight: 600; }
+.col-expense  { color: var(--red);   font-weight: 600; }
+.col-net-pos  { color: var(--green); font-weight: 700; }
+.col-net-neg  { color: var(--red);   font-weight: 700; }
+
+/* ── Utilities ── */
+.empty-state {
+  text-align: center;
+  color: var(--muted);
+  padding: 24px 0;
+  font-size: 14px;
+}
+
+/* ── Footer ── */
+footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+
+/* ── Desktop: 2-column layout ── */
+@media (min-width: 900px) {
+  main {
+    max-width: 1000px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 16px;
+  }
+
+  /* Form: full left column */
+  main .card:nth-child(1) { grid-column: 1; grid-row: 1 / 4; }
+  /* Chart: top-right */
+  main .card:nth-child(2) { grid-column: 2; grid-row: 1; }
+  /* Transaction list: middle-right */
+  main .card:nth-child(3) { grid-column: 2; grid-row: 2; }
+  /* Summary: bottom-right */
+  main .card:nth-child(4) { grid-column: 2; grid-row: 3; }
+}
